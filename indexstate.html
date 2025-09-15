@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>калькулятор</title>
+<style>
+  /* Базовые стили для тела и фона */
+  body {
+    margin: 0;
+    background: #121212;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #ddd;
+    -webkit-font-smoothing: antialiased;
+  }
+  #calc-app {
+    background: rgba(30,30,30,0.6);
+    border-radius: 25px;
+    width: 380px;
+    max-width: 95vw;
+    box-shadow:
+      0 4px 6px rgba(255, 255, 255, 0.1),
+      inset 0 0 30px rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 20px 25px;
+    box-sizing: border-box;
+    animation: fadeInScale 0.8s ease forwards;
+  }
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  header {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #eee;
+    margin-bottom: 25px;
+    text-shadow: 0 0 6px rgba(255 255 255 / 0.3);
+  }
+  .screen {
+    background: rgba(50,50,50,0.5);
+    border-radius: 18px;
+    padding: 18px 22px;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #eee;
+    text-align: right;
+    min-height: 65px;
+    box-shadow: inset 0 0 30px rgba(255,255,255,0.1);
+    margin-bottom: 25px;
+    user-select: none;
+    letter-spacing: 1.5px;
+    overflow-x: auto;
+  }
+  .screen::-webkit-scrollbar {
+    height: 6px;
+  }
+  .screen::-webkit-scrollbar-thumb {
+    background: rgba(255, 165, 0, 0.6);
+    border-radius: 5px;
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  button {
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 15px;
+    color: #eee;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 16px 0;
+    cursor: pointer;
+    box-shadow:
+      0 1px 5px rgba(0,0,0,0.3),
+      inset 0 -3px 6px rgba(255,255,255,0.15);
+    transition:
+      background 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: rgba(255, 165, 0, 0.5);
+    color: #111;
+    box-shadow:
+      0 0 15px rgba(255,165,0,0.8),
+      inset 0 0 10px rgba(255,165,0,0.6);
+  }
+  button:active:not(:disabled) {
+    background: rgba(255, 140, 0, 0.7);
+    box-shadow: inset 0 2px 6px rgba(255,165,0,0.9);
+    transform: scale(0.95);
+    color: #111;
+  }
+  button.operator {
+    background: rgba(200,200,200,0.15);
+    color: #ccc;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  button.operator:hover:not(:disabled) {
+    background: rgba(200,200,200,0.6);
+    color: #222;
+    box-shadow:
+      0 0 12px rgba(255,165,0,0.6);
+  }
+  button.equals {
+    grid-column: span 2;
+    background: rgba(255,165,0,0.85);
+    color: #111;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(255,165,0,0.9);
+  }
+  button.equals:hover {
+    background: rgba(255,140,0,0.95);
+  }
+  button.clear {
+    background: rgba(220, 20, 20, 0.5);
+    color: #fff;
+    font-weight: 600;
+  }
+  button.clear:hover {
+    background: rgba(220, 20, 20, 0.8);
+    box-shadow: 0 0 14px rgba(220,20,20,0.8);
+  }
+
+  /* Адаптив */
+  @media (max-width: 480px) {
+    #calc-app {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      padding: 25px 15px 40px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: none;
+      justify-content: flex-start;
+    }
+    header {
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+    }
+    .screen {
+      font-size: 2rem;
+      min-height: 50px;
+      margin-bottom: 15px;
+    }
+    .buttons {
+      gap: 10px;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    button {
+      font-size: 1.1rem;
+      padding: 14px 0;
+      border-radius: 12px;
+    }
+    button.equals {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="calc-app" role="application" aria-label="калькулятор">
+    <header>калькулятор</header>
+    <div class="screen" id="display" aria-live="polite" aria-atomic="true">0</div>
+    <div class="buttons">
+      <button class="clear" id="clear" aria-label="Очистить">C</button>
+      <button id="back" aria-label="Удалить последний символ">←</button>
+      <button class="operator" data-op="(" aria-label="Открыть скобку">(</button>
+      <button class="operator" data-op=")" aria-label="Закрыть скобку">)</button>
+      <button class="operator" data-op="%" aria-label="Процент">%</button>
+
+      <button data-num="7" aria-label="Семь">7</button>
+      <button data-num="8" aria-label="Восемь">8</button>
+      <button data-num="9" aria-label="Девять">9</button>
+      <button class="operator" data-op="/" aria-label="Деление">÷</button>
+      <button class="operator" data-op="sqrt" aria-label="Квадратный корень">√</button>
+
+      <button data-num="4" aria-label="Четыре">4</button>
+      <button data-num="5" aria-label="Пять">5</button>
+      <button data-num="6" aria-label="Шесть">6</button>
+      <button class="operator" data-op="*" aria-label="Умножение">×</button>
+      <button class="operator" data-op="^" aria-label="Возведение в степень">^</button>
+
+      <button data-num="1" aria-label="Один">1</button>
+      <button data-num="2" aria-label="Два">2</button>
+      <button data-num="3" aria-label="Три">3</button>
+      <button class="operator" data-op="-" aria-label="Вычитание">−</button>
+      <button id="negate" aria-label="Изменить знак">±</button>
+
+      <button data-num="0" style="grid-column: span 2;" aria-label="Ноль">0</button>
+      <button data-num="." aria-label="Десятичная точка">.</button>
+      <button class="operator" data-op="+" aria-label="Сложение">+</button>
+      <button class="equals" id="equals" aria-label="Равно">=</button>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    const display = document.getElementById('display');
+    const buttons = document.querySelectorAll('button');
+    let currentInput = '';
+    let resetNext = false;
+
+    // Функция для безопасного вычисления выражений с поддержкой %, sqrt, ^
+    function safeEval(expr) {
+      try {
+        // Заменяем проценты: "N%" => "(N/100)"
+        let safeExpr = expr.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+        // Заменяем sqrt(n) на Math.sqrt(n)
+        safeExpr = safeExpr.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
+        // Заменяем степени a^b на Math.pow(a,b)
+        while (/\d+(\.\d+)?\^\d+(\.\d+)?/.test(safeExpr)) {
+          safeExpr = safeExpr.replace(/(\d+(\.\d+)?)\^(\d+(\.\d+)?)/g, 'Math.pow($1,$3)');
+        }
+        // Запрет на все кроме цифр, знаков и Math.pow, Math.sqrt
+        if (/[^0-9+\-*/%.()MathpowqrtA-Za-z, ]/.test(safeExpr)) return 'Ошибка';
+        // eslint-disable-next-line no-eval
+        let res = eval(safeExpr);
+        if (!isFinite(res)) return 'Ошибка';
+        return +res.toFixed(10);
+      } catch {
+        return 'Ошибка';
+      }
+    }
+
+    function updateDisplay(){
+      display.textContent = currentInput || '0';
+    }
+
+    function appendInput(val){
+      if(resetNext){
+        currentInput = val === '.' ? '0.' : val;
+        resetNext = false;
+      } else {
+        if(!(val === '.' && currentInput.slice(-1) === '.')){
+          currentInput += val;
+        }
+      }
+      updateDisplay();
+    }
+
+    // Переключает знак последнего числа
+    function negateLastNumber(){
+      let tokens = currentInput.match(/([+\-*/%()])|(\d+(\.\d+)?)/g);
+      if (!tokens) return;
+      // Ищем последний числовой токен с позиции конца
+      for(let i=tokens.length-1; i>=0; i--){
+        if(tokens[i] && !/[+\-*/%()]/.test(tokens[i])){
+          let n = parseFloat(tokens[i]);
+          n = -n;
+          tokens[i] = n.toString();
+          break;
+        }
+      }
+      currentInput = tokens.join('');
+      updateDisplay();
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const num = button.getAttribute('data-num');
+        const op = button.getAttribute('data-op');
+
+        switch(button.id){
+          case 'clear':
+            currentInput = '';
+            resetNext = false;
+            updateDisplay();
+            break;
+          case 'back':
+            if(!resetNext){
+              currentInput = currentInput.slice(0,-1);
+              updateDisplay();
+            }
+            break;
+          case 'equals':
+            if(currentInput.trim()==='') return;
+            // Меняем sqrt(x) и степени перед вычислением
+            let expr = currentInput;
+            // Replaces sqrt symbol with function notation
+            expr = expr.replace(/√/g, 'sqrt');
+            const result = safeEval(expr);
+            currentInput = result.toString();
+            resetNext = true;
+            updateDisplay();
+            break;
+          case 'negate':
+            negateLastNumber();
+            break;
+          default:
+            if(num !== null){
+              appendInput(num);
+            } else if(op !== null){
+              if(op==='sqrt'){
+                appendInput('sqrt(');
+              } else {
+                // Проверка крайних символов
+                if(currentInput.length === 0 && (op==='+' || op==='-' || op==='*' || op==='/' || op===')')){
+                  return; // не добавлять операторы вначале, кроме (
+                }
+                const lastChar = currentInput.slice(-1);
+                if('+-*/%^('.includes(lastChar) && '+-*/%^)'.includes(op)){
+                  if(op === ')' && currentInput.indexOf('(') === -1) return;
+                  //заменяем последний оператор на новый
+                  currentInput = currentInput.slice(0,-1) + op;
+                }
+                else {
+                  currentInput += op;
+                }
+              }
+              updateDisplay();
+              resetNext = false;
+            }
+            break;
+        }
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      const allowedKeys = '0123456789+-*/%.()^';
+      if(allowedKeys.includes(e.key)){
+        e.preventDefault();
+        if('0123456789.'.includes(e.key)){
+          appendInput(e.key);
+        } else if ('+-*/^()'.includes(e.key)){
+          // Для плюса-минуса вначале - пропускаем
+          if(currentInput.length ===0 && e.key!== '-' && e.key !== '(') return;
+          const lastChar = currentInput.slice(-1);
+          if('+-*/%^('.includes(lastChar) && '+-*/%^)'.includes(e.key)){
+            currentInput = currentInput.slice(0,-1) + e.key;
+          } else {
+            currentInput += e.key;
+          }
+          updateDisplay();
+          resetNext = false;
+        } else if(e.key === '%'){
+          currentInput += '%';
+          updateDisplay();
+        }
+      } else if(e.key === 'Enter'){
+        e.preventDefault();
+        const result = safeEval(currentInput);
+        currentInput = result.toString();
+        resetNext = true;
+        updateDisplay();
+      } else if(e.key === 'Backspace'){
+        e.preventDefault();
+        if(!resetNext){
+          currentInput = currentInput.slice(0,-1);
+          updateDisplay();
+        }
+      } else if(e.key === 'Escape'){
+        e.preventDefault();
+        currentInput = '';
+        resetNext = false;
+        updateDisplay();
+      }
+    });
+
+  })();
+</script>
+</body>
+</html>
